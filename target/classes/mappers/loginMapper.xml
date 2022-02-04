@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jointree.mappers.login">
+
+	<insert id="register">
+		INSERT INTO member
+		 (
+		 mberId,
+		 mberPw,
+		 mberName,
+		 mberEmail,
+		 mberRank,
+		 cAdress,
+		 psQ,
+		 psA,
+		 authKey,
+		 authStatus
+		 )
+		 VALUES
+		 (
+		 #{mberId},
+		 PASSWORD(#{mberPw}),
+		 #{mberName},
+		 #{mberEmail},
+		 #{mberRank},
+		 #{cAdress},
+		 #{psQ},
+		 #{psA},
+		 #{authKey},
+		 #{authStatus}
+		 )
+	</insert>
+	
+	<select id="login" resultType="com.jointree.example.Vo.Member">
+		SELECT mberId	mberId,
+			   mberPw	mberPw,
+			   mberName	mberName,
+			   mberRank mberRank,
+			   mberEmail	mberEmail,
+			   cAdress cAdress,
+			   authStatus authStatus
+		FROM member
+		WHERE mberId = #{mberId}
+		AND	  mberPw = PASSWORD(#{mberPw})
+	</select>
+	
+	<select id="idcheck" resultType="com.jointree.example.Vo.Member">
+		SELECT mberId	mberId
+		FROM member
+		WHERE mberId = #{mberId}
+	</select>
+	
+	<select id="PasswordCheck" resultType="com.jointree.example.Vo.Member">
+		SELECT mberPw mberPw
+		FROM member
+		WHERE mberPw = PASSWORD(#{mberPw})
+		AND mberId = #{mberId}
+	</select>
+	
+	<select id="Findid" resultType="com.jointree.example.Vo.Member">
+		SELECT mberId mberId
+		FROM member
+		WHERE mberName = #{mberName}
+		AND	  mberEmail = #{mberEmail}
+	</select>
+
+	<select id="Findps" resultType="com.jointree.example.Vo.Member">
+		SELECT mberId	mberId,
+			mberEmail	mberEmail,
+			authKey	authKey
+		FROM member
+		WHERE mberId = #{mberId}
+		AND psQ = #{psQ}
+		AND psA = #{psA}
+	</select>
+	
+	<update id="psupdate">
+		UPDATE member
+		SET	mberPw = PASSWORD(#{mberPw}),
+		authKey = #{newKey}
+		WHERE mberId = #{mberId}
+		AND mberEmail = #{mberEmail}
+		AND authKey = #{authKey}
+	</update>
+
+	<update id="authStatus">
+		UPDATE member
+		SET	authStatus = "Y"
+		WHERE authKey = #{authKey}
+	</update>	
+	
+	<select id="emailConfirm" resultType="com.jointree.example.Vo.Member">
+		SELECT 
+		mberId	mberId,	
+		mberName mberName	
+		FROM member
+		WHERE authKey = #{authKey}
+		AND mberEmail = #{mberEmail}
+	</select>
+	
+	<select id="email" resultType="com.jointree.example.Vo.Member">
+		SELECT 
+		mberId	mberId	
+		FROM member
+		WHERE mberEmail = #{mberEmail}
+	</select>
+	
+	<select id="authKeyConfirm" resultType="com.jointree.example.Vo.Member">
+		SELECT
+			authKey authKey
+		FROM member
+		WHERE authKey = #{authKey}
+	</select>
+	
+	<update id="memberupdate">
+		UPDATE member
+		SET	
+			mberName = #{mberName},
+			cAdress = #{cAdress},
+			mberRank = #{mberRank},
+			mberEmail = #{mberEmail}		
+		WHERE mberId = #{mberId}
+	</update>
+	
+	<update id="updatepassword">
+		UPDATE member
+		SET	
+			mberPw = PASSWORD(#{changePw})		
+		WHERE mberId = #{mberId}
+		AND mberPw = PASSWORD(#{mberPw})
+	</update>
+	
+	<delete id="deletemember">
+		DELETE 
+		FROM
+			member
+		WHERE
+			mberId = #{mberId}
+		AND
+			mberPw = PASSWORD(#{mberPw})
+	</delete>
+	
+
+</mapper>
+
+

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jointree.mappers.Board">
+
+<select id="boardlist" resultType="com.jointree.example.Vo.boardVO">
+SELECT
+	POST_ID as postId,
+	POST_TITLE as postTitle,
+	POST_WRITER as postWriter 
+ FROM board_post
+</select>
+
+<select id="uploadlist" resultType="com.jointree.example.Vo.boardVO">
+SELECT
+	POST_ID as postId,
+	POST_TITLE as postTitle,
+	POST_WRITER as postWriter 
+ FROM upload_post
+</select>
+	
+<select id="exceldown" resultType="map">
+SELECT
+	POST_ID as postId,
+	POST_TITLE as postTitle,
+	POST_WRITER as postWriter 
+ FROM board_post
+</select>
+
+<insert id="insertexcel" parameterType="com.jointree.example.Vo.boardVO">
+INSERT INTO upload_post(
+	POST_ID,
+	POST_TITLE,
+	POST_WRITER
+	)
+	VALUES
+	<foreach collection="excelContent" item="item" separator=",">
+	(
+	#{item.A},
+	#{item.C},
+	#{item.B}
+	)
+	</foreach>
+</insert>
+
+<delete id="tablereset">
+truncate upload_post
+</delete>
+
+<select id="searchall" resultType="com.jointree.example.Vo.boardVO">
+SELECT
+	POST_ID as postId,
+	POST_TITLE as postTitle,
+	POST_WRITER as postWriter
+FROM board_post
+WHERE POST_ID LIKE CONCAT('%',#{searchvalue},'%')
+OR POST_TITLE LIKE CONCAT('%',#{searchvalue},'%')
+OR POST_WRITER LIKE CONCAT('%',#{searchvalue},'%')
+</select>
+
+<select id="search" resultType="com.jointree.example.Vo.boardVO">
+SELECT
+	POST_ID as postId,
+	POST_TITLE as postTitle,
+	POST_WRITER as postWriter
+FROM board_post
+WHERE ${searchtitle} LIKE CONCAT('%',#{searchvalue},'%')
+</select>
+	
+</mapper>
+
+

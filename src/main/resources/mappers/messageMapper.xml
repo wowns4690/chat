@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jointree.mappers.Message">
+
+	<select id="userlist" resultType="com.jointree.example.Vo.ChatMessage">
+		SELECT 
+			distinct
+			*
+		FROM chatmessage
+		WHERE chatRoomId = #{chatRoomId}
+	</select>
+	
+	<insert id="userenter">
+		INSERT IGNORE INTO chatmessage
+		(
+		chatRoomId,
+		writer,
+		message,
+		rank,
+		mberId,
+		type
+		)
+		VALUES(
+		#{chatRoomId},
+		#{writer},
+		#{message},
+		#{rank},
+		#{mberId},
+		#{type}
+		)
+	</insert>
+	
+	<delete id="userquit">
+	DELETE 
+	FROM chatmessage
+	WHERE chatRoomId = #{chatRoomId}
+	AND mberId = #{mberId}
+	</delete>
+
+</mapper>
+
+

@@ -1,0 +1,521 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jointree.mappers.Chat">
+
+	<select id="chatlist" resultType="com.jointree.example.Vo.ChatRoom">
+	SELECT
+		roomId rmd,
+		name  nm,
+		foodCategory foodCategory,
+		orderType	orderType,
+		roomMaster	roomMaster,
+		roomMasterId	roomMasterId,
+		masterRank	masterRank
+	FROM chatroom
+	WHERE useYn = "Y"
+	AND date_format(chatDate, "%Y-%m-%d") = #{chatDate}
+	</select>
+
+	<select id = "findchatid" resultType="com.jointree.example.Vo.ChatRoom">
+	SELECT
+		roomId rmd,
+		name nm,
+		orderType orderType,
+		foodCategory foodCategory,
+		roomMaster roomMaster,
+		roomMasterId roomMasterId,
+		storeName	storeName,
+		storeUrl	storeUrl
+		 
+	FROM chatroom
+	WHERE roomId = #{rmd}
+	</select>
+	
+	<select id="menulist" resultType="com.jointree.example.Vo.ChatRoom">
+	SELECT
+		menu	menu,
+		menuprice	menuprice
+	FROM menuinfor
+	WHERE roomId = #{rmd}
+	AND useYn = "Y"
+		
+	</select>
+
+	<select id = "createroom" >
+	INSERT INTO chatroom
+	(
+		roomId,
+		name,
+		foodCategory,
+		orderType,
+		roomMaster,
+		roomMasterId,
+		masterRank,
+		storeName,
+		storeAdress,
+		storeRoadAdress,
+		storeX,
+		storeY,
+		storeUrl,
+		chatDate,
+		useYn
+	)
+	VALUES(
+		#{rmd},
+		#{nm},
+		#{foodCategory},
+		#{orderType},
+		#{roomMaster},
+		#{roomMasterId},
+		#{masterRank},
+		#{storeName},
+		#{storeAdress},
+		#{storeRoadAdress},
+		#{storeX},
+		#{storeY},
+		#{storeUrl},
+		#{chatDate},
+		#{useYn}
+	)
+	</select>
+	
+	<insert id="menuinfor">
+	INSERT INTO menuinfor(
+	roomId,
+	menu,
+	menuprice,
+	useYn
+	)
+	VALUES(
+	#{rmd},
+	#{menu},
+	#{menuprice},
+	"Y"
+	)
+	</insert>
+	
+	<update id="deleteroom">
+	UPDATE
+		chatroom
+	SET 
+		useYn = "N"
+	WHERE 
+		roomId = #{id}
+	</update>
+	
+	<select id="orderSheet" resultType="com.jointree.example.Vo.orderSheet">
+	SELECT
+		distinct 
+		roomId,
+		mberId,
+		mberName,
+		mberRank,
+		menu,
+		menuprice,
+		count(*) ordercount
+	FROM ordersheet
+	WHERE roomId = #{roomId}
+	AND useYn = "Y"
+	AND date_format(orderDate, "%Y-%m-%d") = #{orderDate}
+	group by menu,mberId
+	</select>
+	
+	<select id = "insertorderSheet">
+	INSERT INTO orderSheet
+	(
+		roomId,
+		mberId,
+		mberName,
+		mberRank,
+		menu,
+		menuprice,
+		storeName,
+		orderDate,
+		CHATROOMNAME,
+		useYn
+		
+	)
+	VALUES(
+		#{roomId},
+		#{mberId},
+		#{mberName},
+		#{mberRank},
+		#{menu},
+		#{menuprice},
+		#{storeName},
+		now(),
+		#{chatroomname},
+		"Y"
+	)
+	</select>
+	
+	<delete id="deleteorderSheet">
+	UPDATE ordersheet
+	SET
+		useYn = "N"
+	WHERE roomId = #{roomId}
+	AND menu = #{menu}
+	AND mberId = #{mberId}
+	</delete>
+	
+	<delete id="deletemenu2">
+	UPDATE ordersheet
+	SET
+		useYn = "N"
+	WHERE roomId = #{roomId}
+	AND menu = #{menu}
+	</delete>
+	
+	<select id="count" resultType = "int">
+	SELECT 
+		count(*) count
+	FROM orderSheet
+	WHERE roomId = #{roomId}
+	AND useYn = "Y"
+	</select>
+	
+	<select id="orderCount" resultType = "com.jointree.example.Vo.orderSheet">
+	SELECT 
+		mberId	mberId,
+		roomId	roomId,
+		mberName mberName,
+		menu menu,
+		menuprice	menuprice,
+		count(menu) ordercount
+	FROM orderSheet
+	WHERE roomId = #{roomId}
+	AND useYn = "Y"
+	AND date_format(orderDate, "%Y-%m-%d") = #{orderDate}
+	GROUP BY menu HAVING count(menu) > 0
+	order by orderDate
+	</select>
+	
+	<delete id="orderminus">
+	UPDATE	ordersheet
+	SET
+		useYn = "N"
+	WHERE roomId = #{roomId}
+	AND mberId = #{mberId}
+	AND menu = #{menu}
+	AND useYn = "Y"
+	limit 1
+	</delete>
+	
+	<select id="firstmenu" resultType = "com.jointree.example.Vo.orderSheet">
+		SELECT MAX(orderDate)	firstmenu
+		FROM orderSheet
+		WHERE roomId = #{roomId}
+		AND mberId = #{mberId}
+		AND menu = #{menu}
+		AND useYn = "Y"
+	</select>
+	
+	<select id="menuinforList" resultType = "com.jointree.example.Vo.menuinfor">
+		SELECT 
+			*
+		FROM menuinfor
+		WHERE roomId = #{roomId}
+		AND useYn = "Y"
+	</select>
+	
+	<insert id="addmenu">
+	INSERT INTO menuinfor
+	(
+	roomId,
+	menu,
+	menuprice,
+	useYn
+	)
+	VALUES(
+	#{roomId},
+	#{menu},
+	#{menuprice},
+	"Y"
+	)
+	</insert>
+	
+	<delete id="deletemenu">
+	UPDATE menuinfor
+	SET
+		useYn = "N"
+	WHERE roomId = #{roomId} 
+	AND menu = #{menu}
+	
+	</delete>
+	
+	<select id="myPageOrder" resultType = "com.jointree.example.Vo.myPageVO">
+	SELECT
+		menu	menu,
+		MONTH(orderDate)	month,
+		menuprice	menuprice,
+		storeName	storeName,
+		date_format(orderDate, "%Y-%m-%d")	orderDate,
+		COUNT(menu)	ordercount,
+		CHATROOMNAME as chatroomname
+	FROM
+		ordersheet
+	WHERE
+		mberId = #{mberId}
+	AND
+		MONTH(orderDate) = #{month}
+	AND
+		YEAR(orderDate) = #{year}
+	AND 
+		useYn = "Y"
+	GROUP BY
+		MONTH(orderDate),DATE(orderDate),menu
+	</select>
+	
+	<!-- 회원들이 먹은 음식별 음식 카운트 -->
+	<select id="adminmenulist" resultType = "com.jointree.example.Vo.adminPage">
+	SELECT
+		menu	menu,
+		count(menu)	menucount,
+		storeName	storeName
+	FROM
+		ordersheet
+	WHERE
+		useYn = "Y"
+	AND
+		MONTH(orderDate) = #{month}
+	AND
+		YEAR(orderDate) = #{year}
+	GROUP BY
+		menu
+	ORDER BY
+		count(menu)
+	DESC
+	</select>
+	
+	<!-- 회원들의 평균 점심 식대 -->
+	<select id="adminavgprice" resultType = "com.jointree.example.Vo.adminPage">
+	SELECT
+		IFNULL(ROUND(AVG(menuprice),0),0) avgPrice
+	FROM 
+		ordersheet
+	WHERE
+		useYn = "Y"
+	AND
+		MONTH(orderDate) = #{month}
+	AND
+		YEAR(orderDate) = #{year}
+	</select>
+	
+	<!-- 가장 비싼 음식 가격 -->
+	<select id="adminmaxprice" resultType = "com.jointree.example.Vo.adminPage">
+	SELECT
+		IFNULL(MAX(menuprice),0)	maxPrice
+	FROM
+		ordersheet
+	WHERE
+		useYn = "Y"
+	AND
+		MONTH(orderDate) = #{month}
+	AND
+		YEAR(orderDate) = #{year}
+	</select>
+	
+	<!-- 가장 비싼 음식 이름 -->
+	<select id="adminmaxpricename" resultType = "com.jointree.example.Vo.adminPage">
+	SELECT
+		DISTINCT
+			menu	menu,
+			storeName	storeName
+	FROM 
+		ordersheet
+	WHERE
+		menuprice = #{maxPrice}
+	AND
+		useYn = "Y"
+	AND
+		MONTH(orderDate) = #{month}
+	AND
+		YEAR(orderDate) = #{year}
+	</select>
+	
+	<!-- 회원별 점심식사 평균 식대 -->
+	<select id="adminavgpricelist" resultType = "com.jointree.example.Vo.adminPage">
+	SELECT
+		mberId	mberId,
+		mberName	mberName,
+		AVG(menuprice)	avgPrice
+	FROM
+		ordersheet
+	WHERE
+		useYn = "Y"
+	AND
+		MONTH(orderDate) = #{month}
+	AND
+		YEAR(orderDate) = #{year}
+	GROUP BY
+		mberId
+	</select>
+	
+	<!-- 회원별 점심식사 평균 식대 -->
+	<select id="adminavgpricelist2" resultType = "com.jointree.example.Vo.adminPage">
+	SELECT
+		mberId	mberId,
+		mberName	mberName,
+		menu	menu,
+		SUM(menuprice)	sumPrice
+	FROM
+		ordersheet
+	WHERE
+		useYn = "Y"
+	AND
+		MONTH(orderDate) = #{month}
+	AND
+		YEAR(orderDate) = #{year}
+	GROUP BY
+		mberId
+	ORDER BY
+		SUM(menuprice)
+	DESC
+	</select>
+	
+	<!-- 파일 업로드 -->
+	<insert id="fileupload">
+	INSERT INTO file_info
+	(
+	roomId,
+	saveFolder,
+	originFile,
+	saveFile,
+	uploadNum,
+	menu,
+	useYn
+	)
+	VALUES(
+	#{roomId},
+	#{saveFolder},
+	#{originFile},
+	#{saveFile},
+	#{uploadNum},
+	#{menu},
+	"Y"
+	)
+	</insert>
+	
+	<!-- 이미지 이름 불러오기 -->
+	<select id="imageload" resultType = "com.jointree.example.Vo.FileInfoDto">
+	SELECT
+		saveFile saveFile,
+		originFile	originFile,
+		saveFolder saveFolder,
+		menu	menu,
+		uploadNum	uploadNum,
+		useYn	useYn
+	FROM 
+		file_info
+	WHERE
+		roomId = #{roomId}
+	ORDER BY
+		uploadNum
+	</select>
+	
+	<!-- 파일 다운로드 -->
+	<select id="filedownload" resultType = "com.jointree.example.Vo.FileInfoDto">
+	SELECT
+		originFile	originFile,
+		saveFolder saveFolder
+	FROM 
+		file_info
+	WHERE
+		saveFile = #{saveFile}
+	</select>
+	
+	<delete id="deleteimage">
+	UPDATE
+		file_info
+	SET
+		useYn = "N"
+	WHERE
+		roomId = #{roomId}
+	AND
+		menu = #{menu}
+	AND
+		uploadNum = #{uploadNum}
+	</delete>
+	
+	<update id = "imagechange">
+	UPDATE
+		file_info
+	SET
+		originFile = #{originFile},
+		saveFile = #{changeFile},
+		menu = #{menu}
+	WHERE
+		roomId = #{roomId}
+	AND 
+		uploadNum = #{uploadNum}
+	</update>
+	
+	
+	<update id = "menuchange">
+	UPDATE
+		menuinfor
+	SET
+		menu = #{changemenu},
+		menuprice = #{menuprice}
+	WHERE
+		roomId = #{roomId}
+	AND
+		menu = #{menu}
+	AND
+		useYn = "Y";
+	</update>
+	
+	<update id = "filemenuchange">
+	UPDATE 
+		file_info
+	SET
+		menu = #{changemenu}
+	WHERE
+		roomId = #{roomId}
+	AND
+		menu = #{menu}
+	</update>
+	
+	<select id="menucount" resultType="com.jointree.example.Vo.menuinfor">
+	SELECT
+		count(*)	menucount
+	FROM
+		menuinfor
+	WHERE
+		roomId = #{roomId}
+	AND
+		useYn = "Y"
+	</select>
+	
+	<update id="osupdate">
+	UPDATE
+		ordersheet
+	SET
+		menu = #{changemenu},
+		menuprice = #{menuprice}
+	WHERE
+		roomId = #{roomId}
+	AND
+		menu = #{menu}
+	AND
+		menuprice = #{originmenuprice}
+	AND 
+		useYn = "Y"
+	</update>
+	
+	<select id="menucheck" resultType="com.jointree.example.Vo.menuinfor">
+	SELECT
+		*
+	FROM 
+		menuinfor
+	WHERE
+		roomId = #{roomId}
+	AND
+		menu = #{menu}
+	AND
+		useYn = "Y"
+	</select>
+	
+</mapper>
+
+
